@@ -13,6 +13,7 @@ import argparse
 from video_centre.capture import Capture
 from video_centre.of_capture import OfCapture
 
+
 class Actions(object):
     def __init__(self, tk, message_handler, data, video_driver, shaders, display, osc_client):
         self.tk = tk
@@ -29,7 +30,7 @@ class Actions(object):
         self.openframeworks_process = None
         self.set_capture_object('value')
         self.server = self.setup_osc_server()
-        
+
     def set_capture_object(self, value):
         if self.data.settings['video']['VIDEOPLAYER_BACKEND']['value'] != 'omxplayer':
             self.python_capture.close_capture()
@@ -70,7 +71,7 @@ class Actions(object):
         self.shaders.shaders_menu.navigate_menu_up()
 
     def enter_on_shaders_selection(self):
-        ##want to select shader if its not selected, and want to enter 'param' mode if it already is
+        # want to select shader if its not selected, and want to enter 'param' mode if it already is
         is_shader, is_selected_shader, selected_shader = self.shaders.enter_on_shaders_selection()
         if is_selected_shader and selected_shader['param_number'] > 0:
             self.set_shader_param_mode()
@@ -83,7 +84,7 @@ class Actions(object):
         self.display.browser_menu.generate_browser_list()
 
     def _load_this_slot_into_next_player(self, slot):
- ### load next player for seamless type otherwise respect player mode
+     # load next player for seamless type otherwise respect player mode
         if self.data.settings['sampler']['LOOP_TYPE']['value'] == 'seamless':
             if self.data.update_next_slot_number(slot):
                 print('should reload next player !! ')
@@ -95,8 +96,6 @@ class Actions(object):
             else:
                 if self.data.update_next_slot_number(slot, is_current=True):
                     self.video_driver.reload_current_player()
-           
-
 
     def load_slot_0_into_next_player(self):
         self._load_this_slot_into_next_player(0)
@@ -136,23 +135,52 @@ class Actions(object):
             if self.video_driver.current_player.show_toggle_on == self.video_driver.next_player.show_toggle_on:
                 self.video_driver.next_player.toggle_show()
 
-
     def cycle_display_mode(self):
         display_modes = self.data.get_display_modes_list(with_nav_mode=True)
 
-        current_mode_index = [index for index, i in enumerate(display_modes) if self.data.display_mode in i][0]
-        next_mode_index = (current_mode_index + 1) % len(display_modes) 
+        current_mode_index = [index for index, i in enumerate(
+            display_modes) if self.data.display_mode in i][0]
+        next_mode_index = (current_mode_index + 1) % len(display_modes)
         self.data.display_mode = display_modes[next_mode_index][0]
         self.data.control_mode = display_modes[next_mode_index][1]
 
     def cycle_display_mode_back(self):
         display_modes = self.data.get_display_modes_list(with_nav_mode=True)
 
-        current_mode_index = [index for index, i in enumerate(display_modes) if self.data.display_mode in i][0]
-        next_mode_index = (current_mode_index - 1) % len(display_modes) 
+        current_mode_index = [index for index, i in enumerate(
+            display_modes) if self.data.display_mode in i][0]
+        next_mode_index = (current_mode_index - 1) % len(display_modes)
         self.data.display_mode = display_modes[next_mode_index][0]
         self.data.control_mode = display_modes[next_mode_index][1]
 
+    # seb
+    def set_display_mode_sampler(self):
+        self.data.display_mode = "SAMPLER"
+        self.data.control_mode = 'PLAYER'
+
+    # seb
+    def set_display_mode_browser(self):
+        self.data.display_mode = "BROWSER"
+        self.data.control_mode = 'NAV_BROWSER'
+
+    # seb
+    def set_display_mode_settings(self):
+        self.data.display_mode = "SETTINGS"
+        self.data.control_mode = 'NAV_SETTINGS'
+
+    # seb
+    def set_display_mode_shader(self):
+        if self.settings['shader']['USE_SHADER']['value'] == 'enabled':
+            # if ["SHADERS", 'NAV_SHADERS'] in display_modes:
+            self.data.display_mode = "SHADERS"
+            self.data.control_mode = 'NAV_SHADERS'
+
+    # seb
+    def set_display_mode_shader_bank(self):
+        if self.settings['shader']['USE_SHADER']['value'] == 'enabled' and self.settings['shader']['USE_SHADER_BANK']['value'] == 'enabled':
+            # if ["SHDR_BNK",'PLAY_SHADER'] in display_modes:
+            self.data.display_mode = "SHDR_BNK"
+            self.data.control_mode = 'PLAY_SHADER'
 
     def toggle_action_on_player(self):
         play = 'play' in self.data.settings['sampler']['ON_ACTION']['value']
@@ -176,68 +204,81 @@ class Actions(object):
 
     def increase_seek_time(self):
         options = self.data.settings['sampler']['SEEK_TIME']['options']
-        current_index = [index for index, item in enumerate(options) if item == self.data.settings['sampler']['SEEK_TIME']['value'] ][0]
-        self.data.settings['sampler']['SEEK_TIME']['value'] = options[(current_index + 1) % len(options) ]
-        self.message_handler.set_message('INFO', 'The Seek Time is now ' + str(self.data.settings['sampler']['SEEK_TIME']['value']) + 's')
-
+        current_index = [index for index, item in enumerate(
+            options) if item == self.data.settings['sampler']['SEEK_TIME']['value']][0]
+        self.data.settings['sampler']['SEEK_TIME']['value'] = options[(
+            current_index + 1) % len(options)]
+        self.message_handler.set_message(
+            'INFO', 'The Seek Time is now ' + str(self.data.settings['sampler']['SEEK_TIME']['value']) + 's')
 
     def decrease_seek_time(self):
         options = self.data.settings['sampler']['SEEK_TIME']['options']
-        current_index = [index for index, item in enumerate(options) if item == self.data.settings['sampler']['SEEK_TIME']['value'] ][0]
-        self.data.settings['sampler']['SEEK_TIME']['value'] = options[(current_index - 1)  % len(options) ]
-        self.message_handler.set_message('INFO', 'The Seek Time is now ' + str(self.data.settings['sampler']['SEEK_TIME']['value']) + 's')
-        
+        current_index = [index for index, item in enumerate(
+            options) if item == self.data.settings['sampler']['SEEK_TIME']['value']][0]
+        self.data.settings['sampler']['SEEK_TIME']['value'] = options[(
+            current_index - 1) % len(options)]
+        self.message_handler.set_message(
+            'INFO', 'The Seek Time is now ' + str(self.data.settings['sampler']['SEEK_TIME']['value']) + 's')
 
-    def seek_forward_on_player(self):    
+    def seek_forward_on_player(self):
         self.video_driver.current_player.seek(self.data.settings['sampler']['SEEK_TIME']['value'])
 
     def seek_back_on_player(self):
-        self.video_driver.current_player.seek(-(self.data.settings['sampler']['SEEK_TIME']['value']))
+        self.video_driver.current_player.seek(
+            -(self.data.settings['sampler']['SEEK_TIME']['value']))
 
     def toggle_function(self):
         self.data.function_on = not self.data.function_on
 
     def next_bank(self):
         self.data.update_bank_number_by_amount(1)
-        print('current bank is {} , the number of banks is {} '.format(self.data.bank_number, len(self.data.bank_data)))
+        print('current bank is {} , the number of banks is {} '.format(
+            self.data.bank_number, len(self.data.bank_data)))
 
     def previous_bank(self):
         self.data.update_bank_number_by_amount(-1)
-        print('current bank is {} , the number of banks is {} '.format(self.data.bank_number, len(self.data.bank_data)))
-              
+        print('current bank is {} , the number of banks is {} '.format(
+            self.data.bank_number, len(self.data.bank_data)))
+
     def increase_speed(self):
         print("increasing speed !")
         new_rate = self.video_driver.current_player.change_rate(1)
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
         self.data.update_slot_rate_to_this(current_slot, new_rate)
-        #self._load_this_slot_into_next_player(current_slot)
+        # self._load_this_slot_into_next_player(current_slot)
 
     def decrease_speed(self):
         print("increasing speed !")
         new_rate = self.video_driver.current_player.change_rate(-1)
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
         self.data.update_slot_rate_to_this(current_slot, new_rate)
-        #self._load_this_slot_into_next_player(current_slot)
+        # self._load_this_slot_into_next_player(current_slot)
 
     def set_playing_sample_start_to_current_duration(self):
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
-        current_position = round(self.video_driver.current_player.get_position(),3)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
+        current_position = round(self.video_driver.current_player.get_position(), 3)
         self.data.update_slot_start_to_this_time(current_slot, current_position)
         self._load_this_slot_into_next_player(current_slot)
 
     def clear_playing_sample_start_time(self):
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
         self.data.update_slot_start_to_this_time(current_slot, -1)
         self._load_this_slot_into_next_player(current_slot)
 
     def set_playing_sample_end_to_current_duration(self):
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
-        current_position = round(self.video_driver.current_player.get_position(),0)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
+        current_position = round(self.video_driver.current_player.get_position(), 0)
         self.data.update_slot_end_to_this_time(current_slot, current_position)
         self._load_this_slot_into_next_player(current_slot)
 
     def clear_playing_sample_end_time(self):
-        current_bank, current_slot = self.data.split_bankslot_number(self.video_driver.current_player.bankslot_number)
+        current_bank, current_slot = self.data.split_bankslot_number(
+            self.video_driver.current_player.bankslot_number)
         self.data.update_slot_end_to_this_time(current_slot, -1)
         self._load_this_slot_into_next_player(current_slot)
 
@@ -245,19 +286,18 @@ class Actions(object):
         is_previewing = self.capture.is_previewing
         if is_previewing:
             self.capture.stop_preview()
-            #if self.video_driver.current_player.status == 'PAUSED':
-                #self.video_driver.current_player.toggle_pause()
+            # if self.video_driver.current_player.status == 'PAUSED':
+            # self.video_driver.current_player.toggle_pause()
         else:
             is_successful = self.capture.start_preview()
-            #if is_successful and self.video_driver.current_player.status != 'PAUSED':
-                #self.video_driver.current_player.toggle_pause()
-
+            # if is_successful and self.video_driver.current_player.status != 'PAUSED':
+            # self.video_driver.current_player.toggle_pause()
 
     def toggle_capture_recording(self):
         is_recording = self.capture.is_recording
         if is_recording:
             self.capture.stop_recording()
-        else: 
+        else:
             self.capture.start_recording()
 
     def toggle_screen_mirror(self):
@@ -297,12 +337,12 @@ class Actions(object):
                 self.data.detour_active = True
                 shader_input = self.data.settings['detour']['SHADER_POSITION']['value'] == 'input'
                 self.video_driver.osc_client.send_message("/detour/start", shader_input)
-                self.load_this_detour_shader() 
+                self.load_this_detour_shader()
 
     def toggle_detour_play(self):
         if self.data.settings['detour']['TRY_DEMO']['value'] == 'enabled':
-            is_playing =  not self.data.detour_settings['is_playing']
-            self.data.detour_settings['is_playing'] = is_playing 
+            is_playing = not self.data.detour_settings['is_playing']
+            self.data.detour_settings['is_playing'] = is_playing
             self.video_driver.osc_client.send_message("/detour/is_playing", is_playing)
 
     def toggle_feedback(self):
@@ -354,14 +394,14 @@ class Actions(object):
 
     def toggle_detour_record(self):
         if self.data.settings['detour']['TRY_DEMO']['value'] == 'enabled':
-            is_recording =  not self.data.detour_settings['is_recording']
-            self.data.detour_settings['is_recording'] = is_recording 
+            is_recording = not self.data.detour_settings['is_recording']
+            self.data.detour_settings['is_recording'] = is_recording
             self.video_driver.osc_client.send_message("/detour/is_recording", is_recording)
 
     def toggle_detour_record_loop(self):
         if self.data.settings['detour']['TRY_DEMO']['value'] == 'enabled':
             record_loop = not self.data.detour_settings['record_loop']
-            self.data.detour_settings['record_loop'] = record_loop 
+            self.data.detour_settings['record_loop'] = record_loop
             self.video_driver.osc_client.send_message("/detour/record_loop", record_loop)
 
     def clear_this_detour(self):
@@ -383,7 +423,8 @@ class Actions(object):
             self.load_this_detour_shader()
 
     def load_this_detour_shader(self):
-        self.video_driver.osc_client.send_message("/detour/load_mix", "/home/pi/r_e_c_u_r/Shaders/2-input/" + self.data.detour_settings['mix_shader'])
+        self.video_driver.osc_client.send_message(
+            "/detour/load_mix", "/home/pi/r_e_c_u_r/Shaders/2-input/" + self.data.detour_settings['mix_shader'])
 
     def switch_to_detour_0(self):
         self.switch_to_this_detour(0)
@@ -399,9 +440,8 @@ class Actions(object):
 
     def switch_to_this_detour(self, number):
         if self.data.settings['detour']['TRY_DEMO']['value'] == 'enabled':
-            self.data.detour_settings['current_detour'] = number 
+            self.data.detour_settings['current_detour'] = number
             self.video_driver.osc_client.send_message("/detour/switch_to_detour_number", number)
-
 
     def set_detour_delay_mode(self, state):
         self.video_driver.osc_client.send_message("/detour/set_delay_mode", state == 'enabled')
@@ -521,7 +561,7 @@ class Actions(object):
             subprocess.call(['pivideo', '-s', setting_value])
 
     def change_output_mode(self, setting_value):
-        ### this seems no longer supported in the firmware...
+        # this seems no longer supported in the firmware...
         if setting_value == 'hdmi':
             self.change_hdmi_settings(setting_value)
         elif setting_value == 'composite':
@@ -541,32 +581,32 @@ class Actions(object):
             self.refresh_frame_buffer_and_restart_openframeworks()
 
     def check_and_set_output_mode_on_boot(self):
-        #### checking if pi display mode is composite
+        # checking if pi display mode is composite
         response = str(subprocess.check_output(['tvservice', '-s']))
         print('tvservice response is {}'.format(response))
         if 'PAL' in response or 'NTSC' in response:
             self.data.update_setting_value('video', 'OUTPUT', 'composite')
         else:
             self.data.update_setting_value('video', 'OUTPUT', 'hdmi')
-            
+
             if self.data.settings['video']['HDMI_MODE']['value'] == "CEA 4 HDMI":
-                
+
                 self.data.update_setting_value('video', 'HDMI_MODE', 'CEA 4 HDMI')
 
                 self.change_hdmi_settings('CEA 4 HDMI')
-                
 
     def check_dev_mode(self):
-        #### check if in dev mode:(ie not using the lcd screen)
+        # check if in dev mode:(ie not using the lcd screen)
         with open('/boot/config.txt', 'r') as config:
-                if '##no_waveshare_overlay' in config.read():
-                    self.data.update_setting_value('system','DEV_MODE_RESET', 'on')
-                else:
-                    self.data.update_setting_value('system','DEV_MODE_RESET', 'off')
+            if '##no_waveshare_overlay' in config.read():
+                self.data.update_setting_value('system', 'DEV_MODE_RESET', 'on')
+            else:
+                self.data.update_setting_value('system', 'DEV_MODE_RESET', 'off')
 
     def check_if_should_start_openframeworks(self):
         if self.data.settings['video']['VIDEOPLAYER_BACKEND']['value'] != 'omxplayer':
-            self.openframeworks_process = subprocess.Popen([self.data.PATH_TO_OPENFRAMEWORKS +'apps/myApps/c_o_n_j_u_r/bin/c_o_n_j_u_r'])
+            self.openframeworks_process = subprocess.Popen(
+                [self.data.PATH_TO_OPENFRAMEWORKS + 'apps/myApps/c_o_n_j_u_r/bin/c_o_n_j_u_r'])
             print('conjur pid is {}'.format(self.openframeworks_process.pid))
 
     def exit_openframeworks(self):
@@ -589,7 +629,7 @@ class Actions(object):
         self.set_capture_object('nothing')
         self.display.settings_menu.generate_settings_list()
         self.reset_players()
-        
+
     def reset_players(self):
         self.video_driver.reset_all_players()
 
@@ -600,16 +640,16 @@ class Actions(object):
         progressive = ''
         if self.data.settings['video']['COMPOSITE_PROGRESSIVE']['value'] == 'on':
             progressive = 'p'
-        
+
         if output == 'composite':
-            subprocess.call(['tvservice --sdtvon="{} {} {}"'.format(mode, aspect, progressive)],shell=True)
+            subprocess.call(
+                ['tvservice --sdtvon="{} {} {}"'.format(mode, aspect, progressive)], shell=True)
             self.refresh_frame_buffer_and_restart_openframeworks()
         self.persist_composite_setting(mode, progressive, aspect)
 
-    
     def _refresh_frame_buffer(self):
         self.data.open_omxplayer_for_reset()
-        subprocess.run(["fbset -depth 16; fbset -depth 32; xrefresh -display :0" ], shell=True)
+        subprocess.run(["fbset -depth 16; fbset -depth 32; xrefresh -display :0"], shell=True)
 
     def persist_composite_setting(self, mode, progressive, aspect):
         sdtv_mode = ''
@@ -634,7 +674,7 @@ class Actions(object):
         self.update_config_settings(sdtv_mode, sdtv_aspect)
 
     def update_config_settings(self, sdtv_mode, sdtv_aspect):
-        self.run_script('set_composite_mode',sdtv_mode, sdtv_aspect)
+        self.run_script('set_composite_mode', sdtv_mode, sdtv_aspect)
 
     def switch_dev_mode(self, state):
         if state == 'on':
@@ -647,13 +687,12 @@ class Actions(object):
             self.switch_display_to_lcd()
 
     def switch_display_to_hdmi(self):
-        with open('/boot/config.txt', 'r') as config: 
+        with open('/boot/config.txt', 'r') as config:
             with open('/usr/share/X11/xorg.conf.d/99-fbturbo.conf') as framebuffer_conf:
                 if 'dtoverlay=waveshare35a:rotate=270' in config.read() and 'dev/fb1' in framebuffer_conf.read():
                     self.run_script('switch_display_to_hdmi')
                 else:
                     self.message_handler.set_message('INFO', 'failed to switch display')
-        
 
     def switch_display_to_lcd(self):
         with open('/boot/config.txt', 'r') as config:
@@ -665,9 +704,10 @@ class Actions(object):
                     self.message_handler.set_message('INFO', 'failed to switch display')
 
     def run_script(self, script_name, first_argument='', second_argument=''):
-        print('first arg is {} , second is {}'.format(first_argument,second_argument))
-        subprocess.call(['/home/pi/r_e_c_u_r/dotfiles/{}.sh'.format(script_name),first_argument, second_argument ])
-           
+        print('first arg is {} , second is {}'.format(first_argument, second_argument))
+        subprocess.call(['/home/pi/r_e_c_u_r/dotfiles/{}.sh'.format(script_name),
+                         first_argument, second_argument])
+
     def toggle_x_autorepeat(self):
         if self.data.auto_repeat_on:
             subprocess.call(['xset', 'r', 'off'])
@@ -676,11 +716,10 @@ class Actions(object):
             subprocess.call(['xset', 'r', 'on'])
             self.data.auto_repeat_on = True
 
-
     def quit_the_program(self):
         self.video_driver.exit_all_players()
         self.exit_openframeworks()
-        self.exit_osc_server('','')
+        self.exit_osc_server('', '')
         self.stop_serial_port_process()
         self.stop_openframeworks_process()
         self.toggle_x_autorepeat()
@@ -688,8 +727,8 @@ class Actions(object):
 
     def restart_the_program(self):
         self.quit_the_program()
-        os.execv('/usr/bin/python3', [sys.argv[0],'/home/pi/r_e_c_u_r/r_e_c_u_r.py'])
-        
+        os.execv('/usr/bin/python3', [sys.argv[0], '/home/pi/r_e_c_u_r/r_e_c_u_r.py'])
+
     def set_shader_param_mode(self):
         self.data.control_mode = 'SHADER_PARAM'
         self.message_handler.set_message('INFO', '[ ]: focus  < >: level ■: back')
@@ -702,35 +741,41 @@ class Actions(object):
         self.shaders.decrease_this_param(self.data.settings['shader']['SHADER_PARAM']['value'])
 
     def increase_param_focus(self):
-        self.shaders.focused_param = (self.shaders.focused_param + 1)%self.shaders.selected_shader_list[self.data.shader_layer]['param_number']
+        self.shaders.focused_param = (
+            self.shaders.focused_param + 1) % self.shaders.selected_shader_list[self.data.shader_layer]['param_number']
 
     def decrease_param_focus(self):
-        self.shaders.focused_param = (self.shaders.focused_param - 1)%self.shaders.selected_shader_list[self.data.shader_layer]['param_number']
+        self.shaders.focused_param = (
+            self.shaders.focused_param - 1) % self.shaders.selected_shader_list[self.data.shader_layer]['param_number']
 
     def increase_shader_param(self):
         options = self.data.settings['shader']['SHADER_PARAM']['options']
-        current_index = [index for index, item in enumerate(options) if item == self.data.settings['shader']['SHADER_PARAM']['value'] ][0]
-        self.data.settings['shader']['SHADER_PARAM']['value'] = options[(current_index + 1) % len(options) ]
-        self.message_handler.set_message('INFO', 'The Param amountis now ' + str(self.data.settings['shader']['SHADER_PARAM']['value']))
+        current_index = [index for index, item in enumerate(
+            options) if item == self.data.settings['shader']['SHADER_PARAM']['value']][0]
+        self.data.settings['shader']['SHADER_PARAM']['value'] = options[(
+            current_index + 1) % len(options)]
+        self.message_handler.set_message(
+            'INFO', 'The Param amountis now ' + str(self.data.settings['shader']['SHADER_PARAM']['value']))
 
     def decrease_shader_param(self):
         options = self.data.settings['shader']['SHADER_PARAM']['options']
-        current_index = [index for index, item in enumerate(options) if item == self.data.settings['shader']['SHADER_PARAM']['value'] ][0]
-        self.data.settings['shader']['SHADER_PARAM']['value'] = options[(current_index - 1) % len(options) ]
-        self.message_handler.set_message('INFO', 'The Param amountis now ' + str(self.data.settings['shader']['SHADER_PARAM']['value']))
-
+        current_index = [index for index, item in enumerate(
+            options) if item == self.data.settings['shader']['SHADER_PARAM']['value']][0]
+        self.data.settings['shader']['SHADER_PARAM']['value'] = options[(
+            current_index - 1) % len(options)]
+        self.message_handler.set_message(
+            'INFO', 'The Param amountis now ' + str(self.data.settings['shader']['SHADER_PARAM']['value']))
 
     def set_fixed_length(self, value):
         self.data.control_mode = 'LENGTH_SET'
         self.message_handler.set_message('INFO', 'tap: ■ ;   < > : back')
         self.fixed_length_setter = length_setter.FixedLengthSetter(self.data)
 
-
     def return_to_default_control_mode(self):
         display_list = self.data.get_display_modes_list(with_nav_mode=True)
         for display, control in display_list:
             if display == self.data.display_mode:
-                 self.data.control_mode = control
+                self.data.control_mode = control
 
     def perform_confirm_action(self):
         action = self.data.confirm_action
@@ -746,10 +791,10 @@ class Actions(object):
         self.message_handler.set_message('INFO', 'confirm: {} ■:y < >:no'.format(action_title[:22]))
 
     def confirm_shutdown(self):
-        self.start_confirm_action('shutdown_pi' )
+        self.start_confirm_action('shutdown_pi')
 
     def confirm_quit(self):
-        self.start_confirm_action('quit_the_program', message='quit' )
+        self.start_confirm_action('quit_the_program', message='quit')
 
     def confirm_switch_dev_mode(self, state):
         # i startd writing a confirm dev mod but it messed with the state if you say no ...
@@ -759,7 +804,6 @@ class Actions(object):
         if self.fixed_length_setter:
             self.fixed_length_setter.record_input()
         self.display.settings_menu.generate_settings_list()
-
 
     def setup_osc_server(self):
         server_parser = argparse.ArgumentParser()
@@ -780,7 +824,8 @@ class Actions(object):
         this_dispatcher.map("/shutdown", self.exit_osc_server)
         #this_dispatcher.map("/player/a/status", self.set_status)
 
-        server = osc_server.ThreadingOSCUDPServer((server_args.ip, server_args.port), this_dispatcher)
+        server = osc_server.ThreadingOSCUDPServer(
+            (server_args.ip, server_args.port), this_dispatcher)
         server_thread = threading.Thread(target=server.serve_forever)
         server_thread.start()
         return server
@@ -790,8 +835,9 @@ class Actions(object):
 
     def create_serial_port_process(self):
         if self.serial_port_process == None:
-            self.serial_port_process = subprocess.Popen("exec " + "ttymidi -s /dev/serial0 -b 38400 -n serial", shell=True)
-            print('created the serial port process ? {}'.format(self.serial_port_process))        
+            self.serial_port_process = subprocess.Popen(
+                "exec " + "ttymidi -s /dev/serial0 -b 38400 -n serial", shell=True)
+            print('created the serial port process ? {}'.format(self.serial_port_process))
 
     def stop_serial_port_process(self):
         if self.serial_port_process is not None:
@@ -802,7 +848,7 @@ class Actions(object):
         self.reset_players()
         self.exit_openframeworks()
         self.stop_openframeworks_process()
-        self.check_if_should_start_openframeworks()        
+        self.check_if_should_start_openframeworks()
 
     def refresh_frame_buffer_and_restart_openframeworks(self):
         if self.data.settings['video']['VIDEOPLAYER_BACKEND']['value'] != 'omxplayer':
@@ -826,18 +872,19 @@ class Actions(object):
         #self.message_handler.set_message('INFO', 'checkin fo updates pls wait')
         recur_repo = git.Repo("~/r_e_c_u_r")
         conjur_repo = git.Repo(self.data.PATH_TO_OPENFRAMEWORKS + "apps/myApps/c_o_n_j_u_r")
-        ofxVideoArtTools_repo = git.Repo(self.data.PATH_TO_OPENFRAMEWORKS +  "/addons/ofxVideoArtTools")
+        ofxVideoArtTools_repo = git.Repo(
+            self.data.PATH_TO_OPENFRAMEWORKS + "/addons/ofxVideoArtTools")
         current_recur_hash = recur_repo.head.object.hexsha
         current_conjur_hash = conjur_repo.head.object.hexsha
         current_ofxVideoArtTools_hash = ofxVideoArtTools_repo.head.object.hexsha
 
-        self.data.try_remove_file(self.data.PATH_TO_DATA_OBJECTS + self.data.SETTINGS_JSON )
-        self.data.try_remove_file(self.data.PATH_TO_DEFAULT_CONJUR_DATA) 
+        self.data.try_remove_file(self.data.PATH_TO_DATA_OBJECTS + self.data.SETTINGS_JSON)
+        self.data.try_remove_file(self.data.PATH_TO_DEFAULT_CONJUR_DATA)
         try:
             recur_repo.remotes.origin.pull()
             conjur_repo.remotes.origin.pull()
             ofxVideoArtTools_repo.remotes.origin.pull()
-        except git.exc.GitCommandError as e: 
+        except git.exc.GitCommandError as e:
             if 'unable to access' in str(e):
                 self.message_handler.set_message('INFO', 'not connected to network')
             else:
@@ -845,14 +892,14 @@ class Actions(object):
                     error_info = e.message
                 else:
                     error_info = e
-                self.message_handler.set_message('ERROR',error_info)
+                self.message_handler.set_message('ERROR', error_info)
             return
-    
+
         new_recur_hash = recur_repo.head.object.hexsha
         new_conjur_hash = conjur_repo.head.object.hexsha
         new_ofxVideoArtTools_hash = ofxVideoArtTools_repo.head.object.hexsha
-        if current_recur_hash != new_recur_hash or current_conjur_hash != new_conjur_hash or current_ofxVideoArtTools_hash != new_ofxVideoArtTools_hash :
-            #something has changed!            
+        if current_recur_hash != new_recur_hash or current_conjur_hash != new_conjur_hash or current_ofxVideoArtTools_hash != new_ofxVideoArtTools_hash:
+            # something has changed!
             self.restart_the_program()
         else:
             self.message_handler.set_message('INFO', 'up to date !')
@@ -867,6 +914,3 @@ class Actions(object):
 
     def clear_message(self):
         self.message_handler.clear_all_messages()
-
-
-

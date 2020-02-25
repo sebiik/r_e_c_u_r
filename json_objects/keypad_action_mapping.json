@@ -39,7 +39,7 @@
 		"DEFAULT": ["set_playing_sample_start_to_current_duration", "clear_playing_sample_start_time"],
         "SHADER_PARAM": ["decrease_param_focus"],
         "PLAY_SHADER": ["decrease_param_focus"],
-        "NAV_DETOUR": ["decrease_mix_shader"]   
+        "NAV_DETOUR": ["decrease_mix_shader"]
 	},
 	"f": {
 		"DEFAULT": ["set_playing_sample_end_to_current_duration", "clear_playing_sample_end_time"],
@@ -74,12 +74,12 @@
         "NAV_DETOUR": ["switch_to_detour_2", "clear_this_detour"]
 	},
 	"m": {
-		"DEFAULT": ["load_slot_3_into_next_player"],
+		"DEFAULT": ["load_slot_3_into_next_player", "set_display_mode_sampler"],
 		"PLAY_SHADER": ["play_shader_3"],
         "NAV_DETOUR": ["switch_to_detour_3"]
 	},
 	"n": {
-		"DEFAULT": ["load_slot_4_into_next_player"],
+		"DEFAULT": ["load_slot_4_into_next_player", "set_display_mode_shader"],
 		"PLAY_SHADER": ["play_shader_4"]
 	},
 	"o": {

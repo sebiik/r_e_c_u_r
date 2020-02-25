@@ -9,7 +9,6 @@ from omxplayer.player import OMXPlayer
 from shutil import copyfile
 
 
-
 class Data(object):
 
     BANK_DATA_JSON = 'display_data.json'
@@ -24,16 +23,18 @@ class Data(object):
     PATH_TO_EXTERNAL_DEVICES = '/media/pi'
     PATH_TO_OPENFRAMEWORKS = '/home/pi/openframeworks10.1/'
     PATH_TO_CONJUR_DATA = PATH_TO_OPENFRAMEWORKS + 'apps/myApps/c_o_n_j_u_r/bin/data/settings.xml'
-    PATH_TO_DEFAULT_CONJUR_DATA = PATH_TO_OPENFRAMEWORKS + 'apps/myApps/c_o_n_j_u_r/bin/data/settings_default.xml'
+    PATH_TO_DEFAULT_CONJUR_DATA = PATH_TO_OPENFRAMEWORKS + \
+        'apps/myApps/c_o_n_j_u_r/bin/data/settings_default.xml'
 
     def __init__(self, message_handler):
         self.message_handler = message_handler
-        
-        #self.EMPTY_BANK = [self.EMPTY_SLOT for i in range(10)]
-        self.PATHS_TO_BROWSER = [self.PATH_TO_EXTERNAL_DEVICES, '/home/pi/Videos' ]
-        self.PATHS_TO_SHADERS = [self.PATH_TO_EXTERNAL_DEVICES, '/home/pi/r_e_c_u_r/Shaders', '/home/pi/Shaders' ]
 
-        ### state data
+        #self.EMPTY_BANK = [self.EMPTY_SLOT for i in range(10)]
+        self.PATHS_TO_BROWSER = [self.PATH_TO_EXTERNAL_DEVICES, '/home/pi/Videos']
+        self.PATHS_TO_SHADERS = [self.PATH_TO_EXTERNAL_DEVICES,
+                                 '/home/pi/r_e_c_u_r/Shaders', '/home/pi/Shaders']
+
+        # state data
         self.auto_repeat_on = True
         self.function_on = False
         self.display_mode = "SAMPLER"
@@ -44,20 +45,22 @@ class Data(object):
         self.update_screen = True
         self.confirm_action = None
         self.player_mode = 'now'
-        
+
         self.feedback_active = False
         self.detour_active = False
         self.detour_mix_shaders = self.get_list_of_two_input_shaders()
-        self.detour_settings = collections.OrderedDict([('current_detour',0), ('is_playing', False), ('is_recording', False), ('record_loop', False),       ('detour_size', False), ('detour_speed', 0), ('memory_full', False), ('mix_shader', self.detour_mix_shaders[0]), ('detour_position', 5), ('detour_start', 0), ('detour_end', 0), ('detour_mix', 0), ('is_delay', False)])
+        self.detour_settings = collections.OrderedDict([('current_detour', 0), ('is_playing', False), ('is_recording', False), ('record_loop', False),       ('detour_size', False), (
+            'detour_speed', 0), ('memory_full', False), ('mix_shader', self.detour_mix_shaders[0]), ('detour_position', 5), ('detour_start', 0), ('detour_end', 0), ('detour_mix', 0), ('is_delay', False)])
 
         self.next_bankslot = '0-0'
         self.current_bankslot = '0-0'
-        
+
         self.shader_layer = 0
-        
-        ### persisted data (use default if doesnt exits):
+
+        # persisted data (use default if doesnt exits):
         if not os.path.isfile(self.PATH_TO_CONJUR_DATA):
-            self.try_remove_file(self.PATH_TO_DATA_OBJECTS + self.SETTINGS_JSON ) # keep the, in sync
+            self.try_remove_file(self.PATH_TO_DATA_OBJECTS +
+                                 self.SETTINGS_JSON)  # keep the, in sync
             copyfile(self.PATH_TO_DEFAULT_CONJUR_DATA, self.PATH_TO_CONJUR_DATA)
 
         self.bank_data = [self.create_empty_bank()]
@@ -76,9 +79,6 @@ class Data(object):
         self.midi_mappings = self._read_json(self.MIDI_MAPPING_JSON)
         self.analog_mappings = self._read_json(self.ANALOG_MAPPING_JSON)
 
-        
-
-        
     @staticmethod
     def create_empty_bank():
         empty_slot = dict(name='', location='', length=-1, start=-1, end=-1, rate=1)
@@ -88,7 +88,7 @@ class Data(object):
     def create_empty_shader_bank():
         empty_slot = dict(name='', path='', param_number=4, shad_type='-')
         return [empty_slot for i in range(10)]
-     
+
     def _read_json(self, file_name):
         with open(self.PATH_TO_DATA_OBJECTS + file_name) as data_file:
             data = json.load(data_file)
@@ -116,9 +116,9 @@ class Data(object):
         tag = tree.find("delayMode")
         tag.text = str(int(value))
         tree.write(self.PATH_TO_CONJUR_DATA)
-    
+
     def get_setting_and_folder_from_name(self, setting_name):
-        for folder_key , folder_item in self.settings.items():
+        for folder_key, folder_item in self.settings.items():
             for setting_key, setting_item in folder_item.items():
                 if setting_key == setting_name:
                     return folder_key, setting_key, setting_item
@@ -136,10 +136,11 @@ class Data(object):
     def create_new_slot_mapping(self, slot_number, file_name):
         ######## used for mapping current video to a specific slot ########
         has_location, location = self._get_path_for_file(file_name)
-        print('file_name:{},has_location:{}, location:{}'.format(file_name,has_location, location))
+        print('file_name:{},has_location:{}, location:{}'.format(file_name, has_location, location))
         length = self._get_length_for_file(location)
         if length:
-            new_slot = dict(name=file_name, location=location, length=length, start=-1, end=-1, rate=1)
+            new_slot = dict(name=file_name, location=location,
+                            length=length, start=-1, end=-1, rate=1)
             self._update_a_slots_data(slot_number, new_slot)
 
     def clear_all_slots(self):
@@ -154,8 +155,8 @@ class Data(object):
             if self.bank_data[-2] == empty_bank:
                 self.bank_data.pop()
         self._update_json(self.BANK_DATA_JSON, self.bank_data)
-        self.bank_number = (self.bank_number+amount)%(len(self.bank_data))
-        
+        self.bank_number = (self.bank_number+amount) % (len(self.bank_data))
+
     def update_next_slot_number(self,  new_value, is_current=False):
         if self.bank_data[self.bank_number][new_value]['location'] == '':
             self.message_handler.set_message('INFO', 'the slot you pressed is empty')
@@ -164,14 +165,13 @@ class Data(object):
             self.message_handler.set_message('INFO', 'no device found for this slot')
             return False
         elif is_current:
-            self.current_bankslot =  '{}-{}'.format(self.bank_number,new_value)
+            self.current_bankslot = '{}-{}'.format(self.bank_number, new_value)
             return True
         else:
-            self.next_bankslot =  '{}-{}'.format(self.bank_number,new_value)
+            self.next_bankslot = '{}-{}'.format(self.bank_number, new_value)
             return True
 
- ######## setting and adding to shader mapping
-
+ # setting and adding to shader mapping
 
     def create_new_shader_mapping_in_first_open(self, file_name):
         ######## used for mapping current shader to next available slot ########
@@ -184,7 +184,7 @@ class Data(object):
     def create_new_shader_mapping(self, slot_number, file_name):
         ######## used for mapping current shader to a specific slot ########
         has_location, location = self._get_path_for_file(file_name)
-        print('file_name:{},has_location:{}, location:{}'.format(file_name,has_location, location))
+        print('file_name:{},has_location:{}, location:{}'.format(file_name, has_location, location))
         new_slot = dict(name=file_name, path=location, shad_type='-', param_number=4)
         self._update_a_shader_slots_data(slot_number, new_slot)
 
@@ -193,28 +193,26 @@ class Data(object):
         self._update_json(self.SHADER_BANK_DATA_JSON, self.shader_bank_data)
 
     def update_shader_layer_by_amount(self, amount):
-        self.shader_layer = (self.shader_layer + amount) % len(self.shader_bank_data) 
-
-
+        self.shader_layer = (self.shader_layer + amount) % len(self.shader_bank_data)
 
     def update_setting_value(self, setting_folder, setting_name, setting_value):
         self.settings[setting_folder][setting_name]['value'] = setting_value
         self._update_json(self.SETTINGS_JSON, self.settings)
         return self.settings[setting_folder][setting_name]
-      
+
     @classmethod
     def split_bankslot_number(cls, bankslot_number):
         split = bankslot_number.split('-')
-        is_bank_num_int , converted_bank_number = cls.try_convert_string_to_int(split[0])
-        is_slot_num_int , converted_slot_number = cls.try_convert_string_to_int(split[1])
+        is_bank_num_int, converted_bank_number = cls.try_convert_string_to_int(split[0])
+        is_slot_num_int, converted_slot_number = cls.try_convert_string_to_int(split[1])
         return converted_bank_number, converted_slot_number
 
     @staticmethod
     def try_convert_string_to_int(string_input):
         try:
-            return True , int(string_input)
+            return True, int(string_input)
         except ValueError:
-            return False , '*'
+            return False, '*'
 
     def get_next_context(self, is_current=False):
         ######## loads the slot details, uses settings to modify them and then set next slot number ########
@@ -222,14 +220,15 @@ class Data(object):
             bankslot_number = self.current_bankslot
         else:
             bankslot_number = self.next_bankslot
-        bank_num , slot_num = self.split_bankslot_number(bankslot_number)
-        
+        bank_num, slot_num = self.split_bankslot_number(bankslot_number)
+
         next_slot_details = self.bank_data[bank_num][slot_num]
         start_value = next_slot_details['start']
         end_value = next_slot_details['end']
         length = next_slot_details['length']
 
-        start_value, end_value = self._overwrite_values_with_sampler_settings(start_value, end_value, length)        
+        start_value, end_value = self._overwrite_values_with_sampler_settings(
+            start_value, end_value, length)
 
         context = dict(location=next_slot_details['location'], name=next_slot_details['name'],
                        length=next_slot_details['length'], rate=next_slot_details['rate'], start=start_value, end=end_value,
@@ -245,22 +244,22 @@ class Data(object):
         fixed_length_multiply = self.settings['sampler']['FIXED_LENGTH_MULTIPLY']['value']
         total_fixed_length = fixed_length_value * fixed_length_multiply
         if start == -1:
-            start = 0        
+            start = 0
         if end == -1:
-            end = length        
+            end = length
         new_end = end
         new_start = start
 
         if use_fixed_length and use_rand_start:
-            max_increase = int(max(end - start - max(total_fixed_length, 4),0))
-            random_increase = randint(0,max_increase)
+            max_increase = int(max(end - start - max(total_fixed_length, 4), 0))
+            random_increase = randint(0, max_increase)
             new_start = start + random_increase
             new_end = min(new_start + total_fixed_length, end)
         elif use_fixed_length and not use_rand_start:
             new_end = min(new_start + total_fixed_length, end)
         elif not use_fixed_length and use_rand_start:
-            max_increase = int(max(end - start - 4,0))
-            random_increase = randint(0,max_increase)
+            max_increase = int(max(end - start - 4, 0))
+            random_increase = randint(0, max_increase)
             new_start = start + random_increase
 
         return new_start, new_end
@@ -270,17 +269,17 @@ class Data(object):
         loaded_slots = self._get_list_of_loaded_slots_in_current_bank()
         if loaded_slots:
             if next_setting == 'random':
-                next_slot = loaded_slots[randint(0,len(loaded_slots)-1)]
+                next_slot = loaded_slots[randint(0, len(loaded_slots)-1)]
             elif next_setting == 'consecutive':
                 next_slot = self.get_next_loaded_slot(slot_num, loaded_slots)
             else:
                 next_slot = slot_num
 
             if is_current:
-                self.current_bankslot =  '{}-{}'.format(self.bank_number,next_slot)
+                self.current_bankslot = '{}-{}'.format(self.bank_number, next_slot)
             else:
-                self.next_bankslot =  '{}-{}'.format(self.bank_number,next_slot)
-            
+                self.next_bankslot = '{}-{}'.format(self.bank_number, next_slot)
+
     def _get_list_of_loaded_slots_in_current_bank(self):
         list_of_loaded_slots = []
         for index, slot in enumerate(self.bank_data[self.bank_number]):
@@ -290,9 +289,9 @@ class Data(object):
 
     @staticmethod
     def get_next_loaded_slot(current_slot, loaded_slots):
-        i = ( current_slot + 1 ) % len(loaded_slots)
+        i = (current_slot + 1) % len(loaded_slots)
         while(i not in loaded_slots):
-            i = ( i + 1 ) % len(loaded_slots)
+            i = (i + 1) % len(loaded_slots)
         return i
 
     def update_slot_start_to_this_time(self, slot_number, position):
@@ -308,7 +307,7 @@ class Data(object):
         self._update_json(self.BANK_DATA_JSON, self.bank_data)
 
     def open_omxplayer_for_reset(self):
-        self._get_length_for_file('/ss',no_message=True )
+        self._get_length_for_file('/ss', no_message=True)
 
     def _get_length_for_file(self, path, no_message=False):
         try:
@@ -322,52 +321,51 @@ class Data(object):
                 self.message_handler.set_message('INFO', 'cannot load video')
             return None
 
-
     def _get_path_for_file(self, file_name):
         ######## returns full path for a given file name ########
-        for path in self.PATHS_TO_BROWSER + self.PATHS_TO_SHADERS:    
+        for path in self.PATHS_TO_BROWSER + self.PATHS_TO_SHADERS:
             for root, dirs, files in os.walk(path):
                 if file_name in files:
                     return True, '{}/{}'.format(root, file_name)
         return False, ''
 
-   
     def is_this_path_broken(self, path):
         external_devices = os.listdir(self.PATH_TO_EXTERNAL_DEVICES)
         has_device_in_path = self.PATH_TO_EXTERNAL_DEVICES in path
         has_existing_device_in_path = any([(x in path) for x in external_devices])
-         
-        if has_device_in_path and  not has_existing_device_in_path:
+
+        if has_device_in_path and not has_existing_device_in_path:
             return True
         else:
             return False
 
     def get_background_colour(self):
         colour_name = self.settings['video']['BACKGROUND_COLOUR']['value']
-        colour_argb = (255,0,0,0)
+        colour_argb = (255, 0, 0, 0)
         if colour_name == "black":
-            colour_argb = (255,0,0,0)
+            colour_argb = (255, 0, 0, 0)
         elif colour_name == "white":
-            colour_argb = (255,255,255,255)
+            colour_argb = (255, 255, 255, 255)
         elif colour_name == "green":
-            colour_argb = (255,0,255,0)
+            colour_argb = (255, 0, 255, 0)
         elif colour_name == "blue":
-            colour_argb = (255,0,0,255)
+            colour_argb = (255, 0, 0, 255)
         elif colour_name == "pink":
-            colour_argb = (255,255,0,255)
+            colour_argb = (255, 255, 0, 255)
         elif colour_name == "none":
-            colour_argb = (0,0,0,0)
+            colour_argb = (0, 0, 0, 0)
         colour_hex = '%02x%02x%02x%02x' % colour_argb
         return colour_hex
 
     def get_display_modes_list(self, with_nav_mode=False):
-        display_modes = [[ "SAMPLER",'PLAYER'], ["BROWSER",'NAV_BROWSER'],["SETTINGS",'NAV_SETTINGS']]
+        display_modes = [["SAMPLER", 'PLAYER'], [
+            "BROWSER", 'NAV_BROWSER'], ["SETTINGS", 'NAV_SETTINGS']]
         if self.settings['video']['VIDEOPLAYER_BACKEND']['value'] != 'omxplayer' and self.settings['shader']['USE_SHADER']['value'] == 'enabled':
-            display_modes.append(["SHADERS",'NAV_SHADERS'])
-            if self.settings['shader']['USE_SHADER_BANK']['value'] == 'enabled' and ["SHADERS",'NAV_SHADERS'] in display_modes:
-                display_modes.append(["SHDR_BNK",'PLAY_SHADER'])
+            display_modes.append(["SHADERS", 'NAV_SHADERS'])
+            if self.settings['shader']['USE_SHADER_BANK']['value'] == 'enabled' and ["SHADERS", 'NAV_SHADERS'] in display_modes:
+                display_modes.append(["SHDR_BNK", 'PLAY_SHADER'])
             if self.settings['detour']['TRY_DEMO']['value'] == 'enabled':
-                display_modes.append(["FRAMES",'NAV_DETOUR'])
+                display_modes.append(["FRAMES", 'NAV_DETOUR'])
         if not with_nav_mode:
             return [mode[0] for mode in display_modes]
         return display_modes
@@ -386,7 +384,7 @@ class Data(object):
         ######## overwrite a given slots info with new data ########
         self.shader_bank_data[self.shader_layer][slot_number] = slot_info
         self._update_json(self.SHADER_BANK_DATA_JSON, self.shader_bank_data)
-    
+
     @staticmethod
     def make_empty_if_none(input):
         if input is None:
@@ -399,12 +397,12 @@ class Data(object):
         if os.path.exists('/home/pi/r_e_c_u_r/Shaders/2-input'):
             (_, _, filenames) = next(os.walk('/home/pi/r_e_c_u_r/Shaders/2-input'))
             return filenames
-        #elif os.path.exists('/home/pi/r_e_c_u_r/Shaders/2-input'):
+        # elif os.path.exists('/home/pi/r_e_c_u_r/Shaders/2-input'):
             #(_, _, filenames) = next(os.walk('/home/pi/r_e_c_u_r/Shaders/2-input'))
-            #return filenames
+            # return filenames
         else:
-            return []        
-    
+            return []
+
     @staticmethod
     def try_remove_file(path):
         if os.path.exists(path):
