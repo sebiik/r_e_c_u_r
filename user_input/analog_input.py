@@ -45,7 +45,7 @@ class AnalogInput(object):
                     if abs(this_reading - self.last_readings[i]) > 10:
                         #print('the diff is {}'.format(this_reading - self.last_readings[i]))
                         self.run_action_for_mapped_channel(i, this_reading)
-                    self.last_readings[i] = this_reading
+                        self.last_readings[i] = this_reading
             self.root.after(self.analog_delay, self.poll_analog_inputs)
         else:
             self.check_if_listening_enabled()
